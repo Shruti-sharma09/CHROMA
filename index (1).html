@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chroma — Palette Extractor & Contrast Checker</title>
+<meta name="description" content="Extract color palettes from images, generate harmonies, and check WCAG contrast for accessible design.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-swatch"></span>
+      <span class="brand-name">Chroma</span>
+    </div>
+    <nav class="toplinks">
+      <button class="toplink active" data-view="extract">Extract</button>
+      <button class="toplink" data-view="contrast">Contrast</button>
+      <button class="toplink" data-view="gallery">Gallery</button>
+    </nav>
+  </header>
+
+  <main class="workspace">
+
+    <!-- EXTRACT VIEW -->
+    <section class="view active" id="view-extract">
+
+      <div class="panel-grid">
+
+        <!-- Left: source controls -->
+        <div class="panel source-panel">
+          <h2 class="panel-title">Source</h2>
+
+          <div class="dropzone" id="dropzone">
+            <input type="file" id="fileInput" accept="image/*" hidden>
+            <div class="dropzone-inner">
+              <span class="dropzone-icon">⤒</span>
+              <p class="dropzone-text">Drop an image here or <span class="dropzone-link">browse</span></p>
+              <p class="dropzone-hint">JPG, PNG, WebP — processed locally, never uploaded</p>
+            </div>
+            <img id="previewImg" class="preview-img" alt="Uploaded image preview" hidden>
+          </div>
+
+          <div class="control-row">
+            <label for="swatchCount">Swatches to extract</label>
+            <input type="range" id="swatchCount" min="3" max="8" value="5">
+            <span class="control-value" id="swatchCountValue">5</span>
+          </div>
+
+          <button class="btn btn-primary" id="extractBtn" disabled>Extract palette</button>
+
+          <div class="divider"><span>or</span></div>
+
+          <h2 class="panel-title">Generate a harmony</h2>
+          <div class="harmony-grid">
+            <button class="btn btn-outline harmony-btn" data-harmony="complementary">Complementary</button>
+            <button class="btn btn-outline harmony-btn" data-harmony="analogous">Analogous</button>
+            <button class="btn btn-outline harmony-btn" data-harmony="triadic">Triadic</button>
+            <button class="btn btn-outline harmony-btn" data-harmony="monochrome">Monochrome</button>
+          </div>
+        </div>
+
+        <!-- Right: palette output -->
+        <div class="panel result-panel">
+          <div class="result-head">
+            <h2 class="panel-title">Palette</h2>
+            <div class="result-actions">
+              <button class="btn btn-ghost" id="savePaletteBtn">Save to gallery</button>
+              <button class="btn btn-ghost" id="exportBtn">Export</button>
+            </div>
+          </div>
+
+          <div class="swatch-row" id="swatchRow">
+            <p class="empty-hint" id="emptyHint">Upload an image or generate a harmony to see swatches here.</p>
+          </div>
+
+          <div class="export-panel" id="exportPanel" hidden>
+            <div class="export-tabs">
+              <button class="export-tab active" data-format="css">CSS Variables</button>
+              <button class="export-tab" data-format="json">JSON</button>
+              <button class="export-tab" data-format="tailwind">Tailwind</button>
+            </div>
+            <pre class="export-code" id="exportCode"></pre>
+            <button class="btn btn-primary" id="copyExportBtn">Copy to clipboard</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CONTRAST VIEW -->
+    <section class="view" id="view-contrast">
+      <div class="panel-grid contrast-grid">
+
+        <div class="panel">
+          <h2 class="panel-title">Foreground</h2>
+          <div class="color-input-row">
+            <input type="color" id="fgPicker" value="#F0EEE9">
+            <input type="text" id="fgHex" class="hex-input" value="#F0EEE9" maxlength="7">
+          </div>
+
+          <h2 class="panel-title" style="margin-top:28px;">Background</h2>
+          <div class="color-input-row">
+            <input type="color" id="bgPicker" value="#1E1F24">
+            <input type="text" id="bgHex" class="hex-input" value="#1E1F24" maxlength="7">
+          </div>
+
+          <button class="btn btn-outline" id="swapColorsBtn" style="margin-top:20px;">↕ Swap colors</button>
+        </div>
+
+        <div class="panel contrast-preview-panel">
+          <h2 class="panel-title">Live preview</h2>
+          <div class="contrast-preview" id="contrastPreview">
+            <p class="preview-large">Design with confidence</p>
+            <p class="preview-small">The quick brown fox jumps over the lazy dog. 0123456789</p>
+          </div>
+
+          <div class="contrast-score-row">
+            <div class="contrast-ratio">
+              <span class="ratio-num" id="ratioValue">1.00</span>
+              <span class="ratio-label">contrast ratio</span>
+            </div>
+            <div class="wcag-badges">
+              <div class="wcag-badge" id="badgeAANormal">
+                <span class="badge-tag">AA</span><span class="badge-sub">Normal text</span>
+              </div>
+              <div class="wcag-badge" id="badgeAALarge">
+                <span class="badge-tag">AA</span><span class="badge-sub">Large text</span>
+              </div>
+              <div class="wcag-badge" id="badgeAAANormal">
+                <span class="badge-tag">AAA</span><span class="badge-sub">Normal text</span>
+              </div>
+              <div class="wcag-badge" id="badgeAAALarge">
+                <span class="badge-tag">AAA</span><span class="badge-sub">Large text</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- GALLERY VIEW -->
+    <section class="view" id="view-gallery">
+      <div class="panel">
+        <h2 class="panel-title">Saved palettes</h2>
+        <div class="gallery-grid" id="galleryGrid"></div>
+        <p class="empty-hint" id="galleryEmptyHint">No saved palettes yet. Extract or generate one, then save it here.</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<canvas id="workCanvas" hidden></canvas>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

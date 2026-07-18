@@ -2,8 +2,6 @@
 
 A designer's color toolkit: pull a palette from any image, generate color harmonies, and check WCAG accessibility contrast — all running locally in the browser, no backend, no sign-up.
 
-**[Live Demo](#)** — replace this with your GitHub Pages link after deploying (steps below)
-
 ![Chroma preview](https://via.placeholder.com/900x500/1A1B20/5EEAD4?text=Chroma+%E2%80%94+Palette+%26+Contrast+Tool)
 
 ## Features
